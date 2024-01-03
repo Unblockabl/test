@@ -1,0 +1,6 @@
+psutil==5.9.7
+requests==2.31.0
+base64==0.5.1
+flask== 2.3.3
+flask_cors==4.0.0
+configparser==6.0.0

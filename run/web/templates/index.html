@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudioPi Web GUI</title>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <style>
+        .mainWidget {
+            width: 400px;
+            padding: 20px;
+            background-color: #e9d8d8;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            z-index: 1; /* Ensure widget is above the grid */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .miniWidget {
+            width: 100px;
+            padding: 10px;
+            background-color: #e9d8d8;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            z-index: 2; /* Ensure mini widget is above the main widget */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .appGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 20px;
+            z-index: 0; /* Ensure grid is behind the widgets */
+        }
+
+        .app {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .app:hover {
+            transform: scale(1.1);
+        }
+
+        body {            
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="miniWidget" id="miniWidget">
+        <button onclick="toggleMainWidget()">Hide Widget</button>
+    </div>
+
+    <div class="mainWidget" id="mainWidget" style="opacity: 1;">
+        <h3>Uptime: <span id="uptimeChart"></span></h3>
+        <br>
+        <h3>RAM usage:</h3>
+        <div id="ramChart" style="width: 300px; height: 200px;"></div>
+        <br>
+        <h3>CPU Usage:</h3>
+        <div id="cpuChart" style="width: 300px; height: 200px;"></div>
+        <br>
+    </div>
+
+    <div class="appGrid" id="appGrid">
+        <button class="app" onclick="promptForAppDetails()">Add App</button>
+        <!-- Other Apps will be added here -->
+    </div>
+
+    <script src="/scripts/ramChart.js" id="ramChartScript"></script>
+    <script src="/scripts/cpuChart.js" id="cpuChartScript"></script>
+    <script src="/scripts/uptimeChart.js" id="uptimeChartScript"></script>
+
+    <script>
+        function promptForAppDetails() {
+            const name = prompt('Enter App Name:');
+            const imagePath = 'https://picsum.photos/32/32'; // Default texture from picsum
+            const url = prompt('Enter App URL:');
+
+            if (name && url) {
+                addApp(name, imagePath, url);
+            } else {
+                alert('App details not provided. App not added.');
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            addApp(`App ${i}`, 'https://picsum.photos/32/32', 'https://google.com');
+        }
+
+        function addApp(name, imagePath, url) {
+            const appGrid = document.getElementById('appGrid');
+            const newApp = document.createElement('div');
+            newApp.classList.add('app');
+            
+            // Add your logic to dynamically set the image source and text name
+            const appImage = document.createElement('img');
+            appImage.src = imagePath;
+            appImage.alt = `${name} Icon`;
+            newApp.appendChild(appImage);
+
+            const appName = document.createElement('div');
+            appName.textContent = name;
+            newApp.appendChild(appName);
+
+            newApp.addEventListener('click', function() {
+                window.open(url, '_blank');
+            });
+
+            appGrid.appendChild(newApp);
+        }
+
+        function toggleMainWidget() {
+            const mainWidget = document.getElementById('mainWidget');
+            const miniWidget = document.getElementById('miniWidget');
+            const button = miniWidget.querySelector('button');
+
+            if (mainWidget.style.opacity == 0) {
+                mainWidget.style.opacity = 1;
+                enableScripts(
+                    document.getElementById('ramChartScript'),
+                    document.getElementById('cpuChartScript'),
+                    document.getElementById('uptimeChartScript')
+                );
+                button.textContent = 'Hide Widget';
+            } else {
+                mainWidget.style.opacity = 0;
+                disableScripts(
+                    document.getElementById('ramChartScript'),
+                    document.getElementById('cpuChartScript'),
+                    document.getElementById('uptimeChartScript')
+                );
+                button.textContent = 'Show Widget';
+            }
+        }
+
+        function disableScripts(...scripts) {
+            scripts.forEach(script => {
+                script.remove();
+            });
+        }
+
+        function enableScripts(...scripts) {
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.src = script.src;
+                newScript.id = script.id;
+                document.head.appendChild(newScript);
+            });
+        }
+    </script>
+</body>
+</html>
